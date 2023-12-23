@@ -29,24 +29,23 @@ int main() {
     int maxSd;
     int signalOrConnectionCount = 0;
 
-    // Socket creating
+    // создаем сокет
     if ((serverFD = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
         perror("create error");
         exit(EXIT_FAILURE);
     }
 
-    // Setting socket address parameters
+    // настройки адреса сокета
     socketAddress.sin_family = AF_INET;
     socketAddress.sin_addr.s_addr = INADDR_ANY;
     socketAddress.sin_port = htons(PORT);
 
-    // Socket binding to the address
+    // привязываем сокет к адресу
     if (bind(serverFD, (struct sockaddr*)&socketAddress, sizeof(socketAddress)) < 0) {
         perror("bind error");
         exit(EXIT_FAILURE);
     }
 
-    // Started socket listenig
     if (listen(serverFD, BACKLOG) < 0) {
         perror("listen error");
         exit(EXIT_FAILURE);
@@ -54,13 +53,13 @@ int main() {
 
     printf("Server started on port %d \n", PORT);
 
-    // Signal handler registration
+    // Регистрация обработчика сигнала
     sigaction(SIGHUP, NULL, &sa);
     sa.sa_handler = sigHupHandler;
     sa.sa_flags |= SA_RESTART;
     sigaction(SIGHUP, &sa, NULL);
 
-    // Setting up signal blocking
+    // блокирование сигнала
     sigemptyset(&blockedMask);
     sigemptyset(&origMask);
     sigaddset(&blockedMask, SIGHUP);
@@ -91,7 +90,7 @@ int main() {
         }
         }
 
-        // Reading incoming bytes
+        // Читаем
         if (incomingSocketFD > 0 && FD_ISSET(incomingSocketFD, &readfds)) { 
             readBytes = read(incomingSocketFD, buffer, 1024);
 
@@ -109,7 +108,7 @@ int main() {
             continue;
         }
         
-        // Check of incoming connections
+        // Проверка сигналов
         if (FD_ISSET(serverFD, &readfds)) {
             if ((incomingSocketFD = accept(serverFD, (struct sockaddr*)&socketAddress, (socklen_t*)&addressLength)) < 0) {
                 perror("accept error");
